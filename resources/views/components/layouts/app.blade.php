@@ -12,7 +12,7 @@
     <main class="container mt-5">
         {{ $slot }}
     </main>
-
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
 </body>
 </html>
