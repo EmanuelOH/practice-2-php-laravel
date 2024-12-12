@@ -70,7 +70,7 @@ class UserController extends Controller
             ]);
 
             $user = User::create($request->all());
-
+          
             event(new UserInformation($user, 'create'));
 
             return redirect()->route('usuarios.index')->with('success', 'Usuario creado de manera exitosa');
