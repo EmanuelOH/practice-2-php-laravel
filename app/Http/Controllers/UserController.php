@@ -12,11 +12,27 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try{
-            $users = User::paginate(10);
+
             $countries = Country::all();
+            $search = $request->get('search');
+
+            if(!empty($search)){
+                $users = User::where('names', 'LIKE', '%' . $search . '%')
+                ->orWhere('id', 'LIKE', '%' . $search . '%')
+                ->orWhere('lastnames', 'LIKE', '%' . $search . '%')
+                ->orWhere('email', 'LIKE', '%' . $search . '%')
+                ->orWhere('phone', 'LIKE', '%' . $search . '%')
+                ->orWhere('country_id', 'LIKE', '%' . $search . '%')
+                ->orWhere('gender', 'LIKE', '%' . $search . '%')
+                ->orWhere('address', 'LIKE', '%' . $search . '%')
+                ->get();
+            }
+            else{
+                $users = User::paginate(10);
+            }
 
             return view('users.index', compact('users', 'countries'));
         }catch(\Exception $e){
@@ -112,5 +128,12 @@ class UserController extends Controller
         }catch(\Exception $e){
             return back()->withErrors(['error' => $e->getMessage()]);
         }
+    }
+
+    
+    public function search(Request $request){
+        
+
+        return view('users.index', compact('users'));
     }
 }
