@@ -37,6 +37,11 @@ class UserController extends Controller
             else{
                 $users = User::paginate(10);
             }
+            return view('users.index', compact('users', 'countries'));
+            
+        }catch(\Exception $e){
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
