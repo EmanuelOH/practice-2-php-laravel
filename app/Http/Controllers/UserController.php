@@ -35,11 +35,6 @@ class UserController extends Controller
             else{
                 $users = User::paginate(10);
             }
-
-            return view('users.index', compact('users', 'countries'));
-        }catch(\Exception $e){
-            return back()->withErrors(['error' => $e->getMessage()]);
-        }
     }
 
     /**
@@ -70,12 +65,11 @@ class UserController extends Controller
             $user = User::create($request->all());
 
             return redirect()->route('usuarios.index')->with('success', 'Usuario creado de manera exitosa');
+
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
-
-
 
     /**
      * Display the specified resource.
@@ -86,6 +80,7 @@ class UserController extends Controller
             $countries = Country::all();
             $user = User::findOrFail($id);
             return view('users.show', compact('user', 'countries'));
+
         }catch(\Exception $e){
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -136,12 +131,5 @@ class UserController extends Controller
         }catch(\Exception $e){
             return back()->withErrors(['error' => $e->getMessage()]);
         }
-    }
-
-    
-    public function search(Request $request){
-        
-
-        return view('users.index', compact('users'));
     }
 }
