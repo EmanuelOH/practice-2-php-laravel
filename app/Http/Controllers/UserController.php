@@ -12,16 +12,29 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try{
-            $users = User::paginate(10);
-            $countries = Country::all();
 
-            return view('users.index', compact('users', 'countries'));
-        }catch(\Exception $e){
-            return back()->withErrors(['error' => $e->getMessage()]);
-        }
+            $countries = Country::all();
+            $search = $request->get('search');
+
+            if(!empty($search)){
+                $users = User::where('names', 'LIKE', '%' . $search . '%')
+                ->orWhere('id', 'LIKE', '%' . $search . '%')
+                ->orWhere('lastnames', 'LIKE', '%' . $search . '%')
+                ->orWhere('email', 'LIKE', '%' . $search . '%')
+                ->orWhere('phone', 'LIKE', '%' . $search . '%')
+                ->orWhere('gender', 'LIKE', '%' . $search . '%')
+                ->orWhere('address', 'LIKE', '%' . $search . '%')
+                ->orWhereHas('country', function($query) use ($search) {
+                    $query->where('name', 'LIKE', '%' . $search . '%');
+                })
+                ->get();
+            }
+            else{
+                $users = User::paginate(10);
+            }
     }
 
     /**
@@ -45,14 +58,18 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
+            $request->merge([
+                'password' => bcrypt($request->password),
+            ]);
+
             $user = User::create($request->all());
 
-            return redirect()->route('usuarios.index')->with('success', 'Usuario creado de una manera exitosa');
+            return redirect()->route('usuarios.index')->with('success', 'Usuario creado de manera exitosa');
+
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
-
 
     /**
      * Display the specified resource.
@@ -60,8 +77,10 @@ class UserController extends Controller
     public function show(string $id)
     {
         try{
+            $countries = Country::all();
             $user = User::findOrFail($id);
-            return view('users.show', compact('user'));
+            return view('users.show', compact('user', 'countries'));
+
         }catch(\Exception $e){
             return back()->withErrors(['error' => $e->getMessage()]);
         }
