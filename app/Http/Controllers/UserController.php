@@ -25,9 +25,11 @@ class UserController extends Controller
                 ->orWhere('lastnames', 'LIKE', '%' . $search . '%')
                 ->orWhere('email', 'LIKE', '%' . $search . '%')
                 ->orWhere('phone', 'LIKE', '%' . $search . '%')
-                ->orWhere('country_id', 'LIKE', '%' . $search . '%')
                 ->orWhere('gender', 'LIKE', '%' . $search . '%')
                 ->orWhere('address', 'LIKE', '%' . $search . '%')
+                ->orWhereHas('country', function($query) use ($search) {
+                    $query->where('name', 'LIKE', '%' . $search . '%');
+                })
                 ->get();
             }
             else{
@@ -61,13 +63,18 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
+            $request->merge([
+                'password' => bcrypt($request->password),
+            ]);
+
             $user = User::create($request->all());
 
-            return redirect()->route('usuarios.index')->with('success', 'Usuario creado de una manera exitosa');
+            return redirect()->route('usuarios.index')->with('success', 'Usuario creado de manera exitosa');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+
 
 
     /**
@@ -76,8 +83,9 @@ class UserController extends Controller
     public function show(string $id)
     {
         try{
+            $countries = Country::all();
             $user = User::findOrFail($id);
-            return view('users.show', compact('user'));
+            return view('users.show', compact('user', 'countries'));
         }catch(\Exception $e){
             return back()->withErrors(['error' => $e->getMessage()]);
         }
