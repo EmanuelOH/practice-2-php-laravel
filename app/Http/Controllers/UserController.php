@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use PHPUnit\Exception;
 use App\Models\Country;
+use App\Events\UserInformation;
+use App\Service\DiscordWebhookService;
 
 class UserController extends Controller
 {
@@ -35,6 +37,11 @@ class UserController extends Controller
             else{
                 $users = User::paginate(10);
             }
+            return view('users.index', compact('users', 'countries'));
+            
+        }catch(\Exception $e){
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -63,6 +70,8 @@ class UserController extends Controller
             ]);
 
             $user = User::create($request->all());
+          
+            event(new UserInformation($user, 'create'));
 
             return redirect()->route('usuarios.index')->with('success', 'Usuario creado de manera exitosa');
 
@@ -106,12 +115,14 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $user = User::find($id);
+
+        $user->update($request->all());
+
+        event(new UserInformation($user, 'update'));
+
+        return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado de una manera exitosa');
         try{
-            $user = User::find($id);
-
-            $user->update($request->all());
-
-            return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado de una manera exitosa');
         }catch(\Exception $e){
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -126,6 +137,8 @@ class UserController extends Controller
             $user = User::find($id);
 
             $user->delete();
+
+            event(new UserInformation($user, 'delete'));
 
             return redirect()->route('usuarios.index')->with('success', 'Usuario eliminado de una manera exitosa');
         }catch(\Exception $e){
