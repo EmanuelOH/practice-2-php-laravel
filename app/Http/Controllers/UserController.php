@@ -3,11 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Country;
+use App\Exports\UsersExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use PHPUnit\Exception;
-use App\Models\Country;
+use Illuminate\Support\Facades\Auth;
+
 use App\Events\UserInformation;
 use App\Service\DiscordWebhookService;
+
 
 class UserController extends Controller
 {
@@ -21,7 +26,6 @@ class UserController extends Controller
             $countries = Country::all();
             $search = $request->get('search');
 
-            if(!empty($search)){
                 $users = User::where('names', 'LIKE', '%' . $search . '%')
                 ->orWhere('id', 'LIKE', '%' . $search . '%')
                 ->orWhere('lastnames', 'LIKE', '%' . $search . '%')
@@ -32,11 +36,8 @@ class UserController extends Controller
                 ->orWhereHas('country', function($query) use ($search) {
                     $query->where('name', 'LIKE', '%' . $search . '%');
                 })
-                ->get();
-            }
-            else{
-                $users = User::paginate(10);
-            }
+                ->paginate(2);
+            
             return view('users.index', compact('users', 'countries'));
             
         }catch(\Exception $e){
@@ -141,6 +142,14 @@ class UserController extends Controller
             event(new UserInformation($user, 'delete'));
 
             return redirect()->route('usuarios.index')->with('success', 'Usuario eliminado de una manera exitosa');
+        }catch(\Exception $e){
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    public function export(){
+        try{
+            return Excel::download(new UsersExport, 'usuarios.xlsx');
         }catch(\Exception $e){
             return back()->withErrors(['error' => $e->getMessage()]);
         }

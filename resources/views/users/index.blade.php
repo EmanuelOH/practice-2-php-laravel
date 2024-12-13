@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="container mt-4">
+    <section class="container mt-4">
         <h1 class="h1 text-center mb-5">Lista de Usuarios</h1>
 
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -81,14 +81,25 @@
             </div>
         </div>
 
-        <div class="text-center mt-3">
-            <p><strong>{{ $users->count() }}</strong> usuarios</p>
-        </div>
-        
-        @if(request()->get('search') == null)
-            <div class="mt-4">
-                {{ $users->links() }}
+        <div class="d-flex justify-content-between align-items-center me-3 mt-3">
+            <div class="d-flex">
+                <div class="">
+                    {{ $users->links() }}
+                </div>
+    
+                <div class="align-self-center ms-2">
+                    <p><strong>{{ $users->count() }}</strong> usuarios</p>
+                </div>
             </div>
-        @endif
-    </div>
+            
+            <div class="text-center my-3">
+                <a href="{{ route('usuarios.export') }}" class="btn btn-success btn-sm d-flex align-items-center justify-content-center gap-2">
+                    <i class="fa-regular fa-file-excel"></i>
+                    <span>Descargar</span>
+                </a>
+            </div>
+
+        </div>
+
+    </section>
 </x-layouts.app>

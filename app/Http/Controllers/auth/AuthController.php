@@ -74,7 +74,6 @@ class AuthController extends Controller
                 'password' => Hash::make($validated['password']),
             ]);
 
-            //dd($user);
 
             return redirect()->route('login')->with('success', 'Usuario creado de manera exitosa');
         } catch (\Exception $e) {
